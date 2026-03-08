@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { questions } from "./questions";
 
-// ─── Paleta de diseño ──────────────────────────────────────────────────────
+// ─── Paleta ────────────────────────────────────────────────────────────────
 const T = {
   bg:          "#080b10",
   surface:     "#0e1320",
@@ -15,232 +16,107 @@ const T = {
   fontMono:    "'DM Mono', monospace",
 };
 
-// ─── Datos de preguntas ────────────────────────────────────────────────────
-const QUESTIONS = [
-  {
-    id: "nombre_real",
-    text: "¿Usás tu nombre real en tus redes sociales?",
-    category: "identidad",
-    options: [
-      { label: "Sí, en todas",       value: "alto",  weight: 15 },
-      { label: "Solo en algunas",     value: "medio", weight: 8  },
-      { label: "No, uso seudónimo",   value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "foto_perfil",
-    text: "¿Tu foto de perfil muestra claramente tu cara?",
-    category: "identidad",
-    options: [
-      { label: "Sí, en la mayoría",  value: "alto",  weight: 12 },
-      { label: "Solo en una red",     value: "medio", weight: 6  },
-      { label: "No uso fotos reales", value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "ubicacion_perfil",
-    text: "¿Tu perfil muestra en qué ciudad o país vivís?",
-    category: "ubicacion",
-    options: [
-      { label: "Sí, ciudad exacta",    value: "alto",  weight: 18 },
-      { label: "Solo el país",          value: "medio", weight: 7  },
-      { label: "No muestro ubicación",  value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "instagram_privado",
-    text: "¿Tu cuenta de Instagram es pública?",
-    category: "redes sociales",
-    options: [
-      { label: "Sí, pública",                       value: "alto",  weight: 14 },
-      { label: "Privada pero con muchos seguidores", value: "medio", weight: 5  },
-      { label: "Privada y selectiva",                value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "lugar_trabajo",
-    text: "¿Tenés publicado tu lugar de trabajo o estudio?",
-    category: "identidad",
-    options: [
-      { label: "Sí, con nombre exacto", value: "alto",  weight: 13 },
-      { label: "Solo el rubro/área",     value: "medio", weight: 5  },
-      { label: "No lo publico",          value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "checkins",
-    text: "¿Publicás fotos con ubicación activada o hacés check-in en lugares?",
-    category: "ubicacion",
-    options: [
-      { label: "Frecuentemente", value: "alto",  weight: 16 },
-      { label: "A veces",         value: "medio", weight: 7  },
-      { label: "Nunca",           value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "numero_telefono",
-    text: "¿Tu número de teléfono está visible en algún perfil público?",
-    category: "contacto",
-    options: [
-      { label: "Sí",                     value: "alto",  weight: 20 },
-      { label: "Solo en grupos privados", value: "medio", weight: 8  },
-      { label: "No",                      value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "contrasenas",
-    text: "¿Usás la misma contraseña en varias plataformas?",
-    category: "hábitos digitales",
-    options: [
-      { label: "Sí, en la mayoría",   value: "alto",  weight: 14 },
-      { label: "En algunas",           value: "medio", weight: 6  },
-      { label: "No, todas distintas",  value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "email_publico",
-    text: "¿Tu email personal aparece en algún sitio público (bio, GitHub, etc.)?",
-    category: "contacto",
-    options: [
-      { label: "Sí",                     value: "alto",  weight: 11 },
-      { label: "Uso un email secundario", value: "medio", weight: 4  },
-      { label: "No",                      value: "bajo",  weight: 0  },
-    ],
-  },
-  {
-    id: "fotos_hogar",
-    text: "¿Publicás fotos donde se ve el exterior o interior de tu casa?",
-    category: "ubicacion",
-    options: [
-      { label: "Sí, seguido", value: "alto",  weight: 17 },
-      { label: "Alguna vez",   value: "medio", weight: 7  },
-      { label: "Nunca",        value: "bajo",  weight: 0  },
-    ],
-  },
-];
-
-// ─── Score ─────────────────────────────────────────────────────────────────
-function calcularScore(answers) {
-  const maxPosible = QUESTIONS.reduce((sum, q) =>
-    sum + Math.max(...q.options.map((o) => o.weight)), 0);
-  const total = Object.values(answers).reduce((sum, w) => sum + w, 0);
-  const score = Math.round((total / maxPosible) * 100);
-  const factores = [...new Set(
-    QUESTIONS.filter((q) => answers[q.id] !== undefined && answers[q.id] >= 10)
-             .map((q) => q.category)
-  )];
-  const nivel = score >= 75 ? "crítico" : score >= 50 ? "alto" : score >= 25 ? "medio" : "bajo";
-  return { score, nivel, factores };
+function getRiskLevel(score) {
+  if (score >= 75) return { label: "Crítico", color: T.accent2 };
+  if (score >= 50) return { label: "Alto",    color: T.accent2 };
+  if (score >= 25) return { label: "Medio",   color: T.accent3 };
+  return             { label: "Bajo",    color: T.accent  };
 }
-
-// ─── Niveles ───────────────────────────────────────────────────────────────
-const NIVEL_CONFIG = {
-  bajo:    { color: T.accent,  label: "Bajo",    desc: "¡Excelente! Tu huella digital está bien controlada."             },
-  medio:   { color: T.accent3, label: "Medio",   desc: "Tu exposición es moderada. Hay margen para mejorar."             },
-  alto:    { color: T.accent2, label: "Alto",    desc: "Tenés varios factores de riesgo que deberías revisar."           },
-  crítico: { color: T.accent2, label: "Crítico", desc: "Tu exposición digital es muy alta. Tomá medidas urgentes."       },
-};
 
 // ─── Componente ────────────────────────────────────────────────────────────
 export default function ExposureTest() {
-  const [step,       setStep]       = useState(0);
-  const [answers,    setAnswers]    = useState({});
-  const [selected,   setSelected]   = useState(null);
-  const [resultado,  setResultado]  = useState(null);
+  const [current,  setCurrent]  = useState(0);   // índice pregunta actual
+  const [answers,  setAnswers]  = useState({});
+  const [score,    setScore]    = useState(null);
+  const [animDir,  setAnimDir]  = useState(1);   // 1 = avanza, -1 = retrocede
 
-  const totalPreguntas = QUESTIONS.length;
-  const preguntaIndex  = step - 1;
-  const preguntaActual = QUESTIONS[preguntaIndex];
-  const progreso       = step === 0 ? 0 : Math.round((preguntaIndex / totalPreguntas) * 100);
+  const total      = questions.length;
+  const q          = questions[current];
+  const answered   = answers[q?.id] !== undefined;
+  const progreso   = Math.round((current / total) * 100);
+  const isLast     = current === total - 1;
 
-  function handleSiguiente() {
-    if (selected === null) return;
-    const newAnswers = { ...answers, [preguntaActual.id]: selected };
+  const handleAnswer = (riskValue) => {
+    const newAnswers = { ...answers, [q.id]: riskValue };
     setAnswers(newAnswers);
-    setSelected(null);
-    if (preguntaIndex + 1 >= totalPreguntas) {
-      const res = calcularScore(newAnswers);
-      setResultado(res);
-      try { localStorage.setItem("doxcheck_resultado", JSON.stringify(res)); } catch (_) {}
-      setStep(step + 1);
-    } else {
-      setStep(step + 1);
-    }
-  }
 
-  // ── INTRO ────────────────────────────────────────────────────────────────
-  if (step === 0) {
+    // Avanza automáticamente después de un pequeño delay
+    setTimeout(() => {
+      if (isLast) {
+        // Calcular score en la última pregunta
+        const total = Object.values(newAnswers).reduce((sum, v) => sum + v, 0);
+        setScore(total);
+        try { localStorage.setItem("doxcheck_resultado", JSON.stringify({ score: total })); } catch (_) {}
+      } else {
+        setAnimDir(1);
+        setCurrent((c) => c + 1);
+      }
+    }, 350);
+  };
+
+  const handleBack = () => {
+    if (current === 0) return;
+    setAnimDir(-1);
+    setCurrent((c) => c - 1);
+  };
+
+  // ── RESULTADO ──────────────────────────────────────────────────────────
+  if (score !== null) {
+    const risk = getRiskLevel(score);
     return (
       <div style={s.wrap}>
-        <div style={s.card}>
-          <span style={s.badge}>10 preguntas · ~2 minutos</span>
-          <h2 style={s.cardTitle}>Antes de empezar</h2>
-          <p style={s.cardDesc}>
-            Respondé con honestidad. No guardamos ningún dato personal.
-            Todo el procesamiento ocurre en tu navegador.
-          </p>
-          <ul style={s.featureList}>
-            {[
-              { icon: "◈", text: "Analizamos tu huella digital",           color: T.accent  },
-              { icon: "◉", text: "Calculamos tu score de exposición",       color: T.accent3 },
-              { icon: "◆", text: "Te damos recomendaciones personalizadas", color: T.accent2 },
-            ].map(({ icon, text, color }) => (
-              <li key={text} style={s.featureItem}>
-                <span style={{ color, fontSize: "0.95rem" }}>{icon}</span>
-                <span style={{ color: T.text, fontSize: "0.88rem" }}>{text}</span>
-              </li>
-            ))}
-          </ul>
-          <button style={s.btnPrimario} onClick={() => setStep(1)}>
-            Comenzar test →
-          </button>
-        </div>
-      </div>
-    );
-  }
+        <div style={{ ...s.card, borderColor: risk.color + "44", boxShadow: `0 0 60px ${risk.color}18` }}>
 
-  // ── RESULTADO ────────────────────────────────────────────────────────────
-  if (resultado) {
-    const cfg = NIVEL_CONFIG[resultado.nivel];
-    return (
-      <div style={s.wrap}>
-        <div style={{
-          ...s.card,
-          borderColor: cfg.color + "44",
-          boxShadow: `0 0 40px ${cfg.color}22`,
-        }}>
-          <span style={{ ...s.badge, color: cfg.color, borderColor: cfg.color + "55", background: cfg.color + "12" }}>
-            Nivel de riesgo — {cfg.label}
+          {/* Badge */}
+          <span style={{ ...s.badge, color: risk.color, borderColor: risk.color + "44", background: risk.color + "12" }}>
+            Nivel de riesgo — {risk.label}
           </span>
 
-          {/* Círculo de score */}
-          <div style={{ display: "flex", justifyContent: "center", margin: "0.5rem 0" }}>
-            <div style={{ ...s.scoreCircle, borderColor: cfg.color, boxShadow: `0 0 32px ${cfg.color}44` }}>
-              <span style={{ fontSize: "2.8rem", fontWeight: 800, color: cfg.color, fontFamily: T.fontDisplay, lineHeight: 1 }}>
-                {resultado.score}
+          {/* Score */}
+          <div style={{ display: "flex", justifyContent: "center", padding: "1rem 0" }}>
+            <div style={{ ...s.scoreCircle, borderColor: risk.color, boxShadow: `0 0 40px ${risk.color}55` }}>
+              <span style={{ fontSize: "3rem", fontWeight: 800, color: risk.color, fontFamily: T.fontDisplay, lineHeight: 1 }}>
+                {score}
               </span>
-              <span style={{ fontSize: "0.78rem", color: T.muted, fontFamily: T.fontMono }}>/ 100</span>
+              <span style={{ fontSize: "0.75rem", color: T.muted, fontFamily: T.fontMono }}>/ 100</span>
             </div>
           </div>
 
-          <p style={{ ...s.cardDesc, textAlign: "center" }}>{cfg.desc}</p>
+          {/* Descripción */}
+          <p style={{ ...s.desc, textAlign: "center" }}>
+            {score >= 75 ? "Tu exposición digital es muy alta. Tomá medidas urgentes."
+            : score >= 50 ? "Tenés varios factores de riesgo que deberías revisar."
+            : score >= 25 ? "Tu exposición es moderada. Hay margen para mejorar."
+            : "¡Excelente! Tu huella digital está bien controlada."}
+          </p>
 
-          {resultado.factores.length > 0 && (
-            <div style={s.tagsRow}>
-              {resultado.factores.map((f) => (
-                <span key={f} style={{ ...s.tag, color: cfg.color, borderColor: cfg.color + "44", background: cfg.color + "0e" }}>
-                  {f}
+          {/* Desglose rápido */}
+          <div style={s.breakdown}>
+            {questions.map((q) => (
+              <div key={q.id} style={s.breakdownItem}>
+                <span style={{ color: T.muted, fontSize: "0.72rem", flex: 1, fontFamily: T.fontMono }}>
+                  {q.question.length > 48 ? q.question.slice(0, 48) + "…" : q.question}
                 </span>
-              ))}
-            </div>
-          )}
+                <span style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  color: answers[q.id] > 0 ? T.accent2 : T.accent,
+                  fontFamily: T.fontMono,
+                  flexShrink: 0,
+                }}>
+                  {answers[q.id] > 0 ? `+${answers[q.id]}` : "✓ 0"}
+                </span>
+              </div>
+            ))}
+          </div>
 
+          {/* Botones */}
           <div style={s.botonesRow}>
             <button style={s.btnPrimario} onClick={() => window.location.href = "/recomendaciones"}>
               Ver recomendaciones →
             </button>
             <button style={s.btnSecundario} onClick={() => {
-              setStep(0); setAnswers({}); setResultado(null); setSelected(null);
+              setAnswers({}); setScore(null); setCurrent(0);
             }}>
               Repetir test
             </button>
@@ -250,57 +126,124 @@ export default function ExposureTest() {
     );
   }
 
-  // ── PREGUNTA ─────────────────────────────────────────────────────────────
+  // ── PREGUNTA ────────────────────────────────────────────────────────────
+  const isYes = answers[q.id] === q.risk;
+  const isNo  = answers[q.id] === 0;
+
   return (
     <div style={s.wrap}>
-      {/* Progreso */}
-      <div style={s.progresoWrapper}>
+
+      {/* Barra de progreso */}
+      <div style={s.progresoOuter}>
         <div style={s.progresoTrack}>
-          <div style={{ ...s.progresoBar, width: `${progreso}%`, transition: "width 0.45s cubic-bezier(0.4,0,0.2,1)" }} />
+          <div style={{
+            ...s.progresoBar,
+            width: `${progreso}%`,
+            transition: "width 0.45s cubic-bezier(0.4,0,0.2,1)",
+          }} />
         </div>
         <span style={s.progresoNum}>
-          {preguntaIndex + 1}
-          <span style={{ color: T.muted }}>/{totalPreguntas}</span>
+          {current + 1}<span style={{ color: T.muted }}>/{total}</span>
         </span>
       </div>
 
+      {/* Card de pregunta */}
       <div style={s.card}>
-        <span style={s.categoria}>{preguntaActual.category}</span>
-        <h2 style={s.preguntaTexto}>{preguntaActual.text}</h2>
 
+        {/* Número grande decorativo */}
+        <span style={s.bigNum}>{String(current + 1).padStart(2, "0")}</span>
+
+        {/* Categoría implícita basada en risk */}
+        <span style={s.riskChip}>
+          riesgo +{q.risk} pts
+        </span>
+
+        {/* Pregunta */}
+        <h3 style={s.qText}>{q.question}</h3>
+
+        {/* Opciones */}
         <div style={s.opcionesGrid}>
-          {preguntaActual.options.map((opcion) => {
-            const isOn = selected === opcion.weight;
-            return (
-              <button
-                key={opcion.value}
-                style={{ ...s.opcionBtn, ...(isOn ? s.opcionActiva : {}) }}
-                onClick={() => setSelected(opcion.weight)}
-              >
-                <span style={{
-                  ...s.radio,
-                  background:   isOn ? T.accent : "transparent",
-                  borderColor:  isOn ? T.accent : T.muted,
-                  boxShadow:    isOn ? `0 0 8px ${T.accent}66` : "none",
-                }}>
-                  {isOn && <span style={{ color: T.bg, fontSize: "0.6rem", fontWeight: 900, lineHeight: 1 }}>✓</span>}
-                </span>
-                <span style={{ color: isOn ? T.text : T.muted, transition: "color 0.15s", fontSize: "0.9rem" }}>
-                  {opcion.label}
-                </span>
-              </button>
-            );
-          })}
+          <button
+            style={{ ...s.opcionBtn, ...(isYes ? s.opcionSi : {}) }}
+            onClick={() => handleAnswer(q.risk)}
+          >
+            <span style={{
+              ...s.radio,
+              background:  isYes ? T.accent2 : "transparent",
+              borderColor: isYes ? T.accent2 : T.muted,
+              boxShadow:   isYes ? `0 0 8px ${T.accent2}88` : "none",
+            }}>
+              {isYes && <span style={{ color: "#fff", fontSize: "0.6rem", fontWeight: 900 }}>✓</span>}
+            </span>
+            <div>
+              <div style={{ color: isYes ? T.accent2 : T.text, fontWeight: 600, fontSize: "0.95rem" }}>Sí</div>
+              <div style={{ color: T.muted, fontSize: "0.75rem", marginTop: "2px" }}>Aumenta mi exposición</div>
+            </div>
+          </button>
+
+          <button
+            style={{ ...s.opcionBtn, ...(isNo ? s.opcionNo : {}) }}
+            onClick={() => handleAnswer(0)}
+          >
+            <span style={{
+              ...s.radio,
+              background:  isNo ? T.accent : "transparent",
+              borderColor: isNo ? T.accent : T.muted,
+              boxShadow:   isNo ? `0 0 8px ${T.accent}88` : "none",
+            }}>
+              {isNo && <span style={{ color: T.bg, fontSize: "0.6rem", fontWeight: 900 }}>✓</span>}
+            </span>
+            <div>
+              <div style={{ color: isNo ? T.accent : T.text, fontWeight: 600, fontSize: "0.95rem" }}>No</div>
+              <div style={{ color: T.muted, fontSize: "0.75rem", marginTop: "2px" }}>No suma riesgo</div>
+            </div>
+          </button>
         </div>
 
-        <button
-          style={{ ...s.btnPrimario, opacity: selected === null ? 0.3 : 1, cursor: selected === null ? "not-allowed" : "pointer" }}
-          onClick={handleSiguiente}
-          disabled={selected === null}
-        >
-          {preguntaIndex + 1 === totalPreguntas ? "Ver mi resultado →" : "Siguiente →"}
-        </button>
+        {/* Navegación manual */}
+        <div style={s.navRow}>
+          <button
+            style={{ ...s.btnNav, opacity: current === 0 ? 0.25 : 1 }}
+            onClick={handleBack}
+            disabled={current === 0}
+          >
+            ← Anterior
+          </button>
+
+          {answered && !isLast && (
+            <button style={s.btnNavNext} onClick={() => setCurrent((c) => c + 1)}>
+              Siguiente →
+            </button>
+          )}
+
+          {answered && isLast && (
+            <button style={s.btnPrimario} onClick={() => {
+              const t = Object.values(answers).reduce((sum, v) => sum + v, 0);
+              setScore(t);
+              try { localStorage.setItem("doxcheck_resultado", JSON.stringify({ score: t })); } catch (_) {}
+            }}>
+              Ver resultado →
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Dots de progreso */}
+      <div style={s.dots}>
+        {questions.map((_, i) => (
+          <span key={i} style={{
+            ...s.dot,
+            background: i < current
+              ? (answers[questions[i].id] > 0 ? T.accent2 : T.accent)
+              : i === current
+              ? T.text
+              : T.surface2,
+            width:  i === current ? "20px" : "6px",
+            opacity: i === current ? 1 : 0.6,
+          }} />
+        ))}
+      </div>
+
     </div>
   );
 }
@@ -311,64 +254,117 @@ const s = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    gap: "1.25rem",
     padding: "1.5rem 1rem 4rem",
     fontFamily: T.fontMono,
     background: T.bg,
+    minHeight: "60vh",
   },
   card: {
     background: T.surface,
     border: `1px solid ${T.border}`,
-    borderRadius: "16px",
+    borderRadius: "20px",
     padding: "2.25rem",
-    maxWidth: "600px",
+    maxWidth: "580px",
     width: "100%",
     display: "flex",
     flexDirection: "column",
-    gap: "1.2rem",
+    gap: "1.25rem",
     transition: "border-color 0.3s, box-shadow 0.3s",
   },
-  badge: {
+  bigNum: {
+    fontFamily: T.fontDisplay,
+    fontSize: "0.75rem",
+    fontWeight: 800,
+    color: T.surface2,
+    letterSpacing: "0.1em",
+  },
+  riskChip: {
     display: "inline-block",
     width: "fit-content",
-    background: T.surface2,
-    color: T.muted,
-    border: `1px solid ${T.border}`,
-    fontSize: "0.7rem",
-    padding: "0.26rem 0.72rem",
+    color: T.accent2,
+    background: "rgba(255,77,109,0.1)",
+    border: "1px solid rgba(255,77,109,0.25)",
     borderRadius: "999px",
+    fontSize: "0.68rem",
+    fontWeight: 600,
+    padding: "0.22rem 0.7rem",
     letterSpacing: "0.07em",
-    fontFamily: T.fontMono,
+    textTransform: "uppercase",
   },
-  cardTitle: {
+  qText: {
     color: T.text,
-    fontSize: "1.5rem",
+    fontSize: "1.25rem",
     fontWeight: 700,
+    lineHeight: 1.4,
     margin: 0,
     fontFamily: T.fontDisplay,
-    letterSpacing: "-0.02em",
+    letterSpacing: "-0.01em",
   },
-  cardDesc: {
-    color: T.muted,
-    fontSize: "0.9rem",
-    lineHeight: 1.65,
-    margin: 0,
-  },
-  featureList: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
+  opcionesGrid: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.45rem",
+    gap: "0.6rem",
   },
-  featureItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
+  opcionBtn: {
     background: T.surface2,
     border: `1px solid ${T.border}`,
+    borderRadius: "12px",
+    padding: "1rem 1.1rem",
+    textAlign: "left",
+    cursor: "pointer",
+    fontFamily: T.fontMono,
+    transition: "all 0.15s",
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+  },
+  opcionSi: {
+    background: "rgba(255,77,109,0.06)",
+    border: "1px solid rgba(255,77,109,0.35)",
+  },
+  opcionNo: {
+    background: "rgba(232,255,71,0.05)",
+    border: "1px solid rgba(232,255,71,0.3)",
+  },
+  radio: {
+    width: "20px",
+    height: "20px",
+    borderRadius: "50%",
+    border: "1.5px solid",
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.15s",
+  },
+  navRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: "0.25rem",
+  },
+  btnNav: {
+    background: "transparent",
+    color: T.muted,
+    border: "none",
+    fontSize: "0.82rem",
+    cursor: "pointer",
+    fontFamily: T.fontMono,
+    padding: "0.4rem 0",
+    transition: "color 0.15s",
+  },
+  btnNavNext: {
+    background: T.surface2,
+    color: T.text,
+    border: `1px solid ${T.border}`,
     borderRadius: "8px",
-    padding: "0.6rem 1rem",
+    padding: "0.6rem 1.25rem",
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: T.fontMono,
+    transition: "all 0.15s",
   },
   btnPrimario: {
     background: T.accent,
@@ -382,7 +378,6 @@ const s = {
     fontFamily: T.fontMono,
     letterSpacing: "0.02em",
     transition: "opacity 0.2s",
-    alignSelf: "flex-start",
   },
   btnSecundario: {
     background: "transparent",
@@ -400,13 +395,12 @@ const s = {
     flexWrap: "wrap",
     alignItems: "center",
   },
-  progresoWrapper: {
+  progresoOuter: {
     display: "flex",
     alignItems: "center",
     gap: "1rem",
-    maxWidth: "600px",
+    maxWidth: "580px",
     width: "100%",
-    marginBottom: "0.75rem",
   },
   progresoTrack: {
     flex: 1,
@@ -424,64 +418,38 @@ const s = {
   progresoNum: {
     color: T.text,
     fontSize: "0.76rem",
-    fontFamily: T.fontMono,
     fontWeight: 600,
     whiteSpace: "nowrap",
     minWidth: "2.8rem",
     textAlign: "right",
   },
-  categoria: {
-    color: T.accent3,
-    fontSize: "0.7rem",
-    fontWeight: 600,
-    letterSpacing: "0.14em",
-    textTransform: "uppercase",
-  },
-  preguntaTexto: {
-    color: T.text,
-    fontSize: "1.18rem",
-    fontWeight: 600,
-    lineHeight: 1.45,
-    margin: 0,
-    fontFamily: T.fontDisplay,
-    letterSpacing: "-0.01em",
-  },
-  opcionesGrid: {
+  dots: {
     display: "flex",
-    flexDirection: "column",
-    gap: "0.45rem",
-  },
-  opcionBtn: {
-    background: T.surface2,
-    border: `1px solid ${T.border}`,
-    borderRadius: "10px",
-    padding: "0.85rem 1rem",
-    textAlign: "left",
-    cursor: "pointer",
-    fontFamily: T.fontMono,
-    transition: "all 0.15s",
-    display: "flex",
+    gap: "5px",
     alignItems: "center",
-    gap: "0.85rem",
-  },
-  opcionActiva: {
-    background: "rgba(232,255,71,0.05)",
-    border: `1px solid rgba(232,255,71,0.35)`,
-  },
-  radio: {
-    width: "18px",
-    height: "18px",
-    borderRadius: "50%",
-    border: "1.5px solid",
-    flexShrink: 0,
-    display: "flex",
-    alignItems: "center",
+    flexWrap: "wrap",
     justifyContent: "center",
-    transition: "all 0.15s",
+    maxWidth: "580px",
+  },
+  dot: {
+    height: "6px",
+    borderRadius: "999px",
+    transition: "all 0.3s ease",
+    flexShrink: 0,
+  },
+  badge: {
+    display: "inline-block",
+    width: "fit-content",
+    fontSize: "0.7rem",
+    padding: "0.26rem 0.72rem",
+    borderRadius: "999px",
+    border: "1px solid",
+    letterSpacing: "0.07em",
+    fontFamily: T.fontMono,
   },
   scoreCircle: {
-    width: "148px",
-    height: "148px",
+    width: "160px",
+    height: "160px",
     borderRadius: "50%",
     border: "2px solid",
     display: "flex",
@@ -491,17 +459,25 @@ const s = {
     gap: "2px",
     transition: "box-shadow 0.3s",
   },
-  tagsRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "0.4rem",
+  desc: {
+    color: T.muted,
+    fontSize: "0.9rem",
+    lineHeight: 1.65,
+    margin: 0,
   },
-  tag: {
-    border: "1px solid",
-    borderRadius: "999px",
-    padding: "0.22rem 0.7rem",
-    fontSize: "0.72rem",
-    letterSpacing: "0.06em",
-    fontFamily: T.fontMono,
+  breakdown: {
+    background: T.surface2,
+    border: `1px solid ${T.border}`,
+    borderRadius: "10px",
+    padding: "1rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.55rem",
+  },
+  breakdownItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "1rem",
   },
 };
