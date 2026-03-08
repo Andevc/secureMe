@@ -16,24 +16,24 @@ const QUESTION_RISK_FACTORS = {
 
 // ─── Paleta ────────────────────────────────────────────────────────────────
 const T = {
-  bg:          "#080b10",
-  surface:     "#0e1320",
-  surface2:    "#141b2d",
-  border:      "rgba(255,255,255,0.06)",
-  accent:      "#e8ff47",
-  accent2:     "#ff4d6d",
-  accent3:     "#47c5ff",
-  text:        "#e8eaf0",
-  muted:       "#6b7280",
+  bg: "#080b10",
+  surface: "#0e1320",
+  surface2: "#141b2d",
+  border: "rgba(255,255,255,0.06)",
+  accent: "#e8ff47",
+  accent2: "#ff4d6d",
+  accent3: "#47c5ff",
+  text: "#e8eaf0",
+  muted: "#6b7280",
   fontDisplay: "'Syne', sans-serif",
-  fontMono:    "'DM Mono', monospace",
+  fontMono: "'DM Mono', monospace",
 };
 
 function getRiskLevel(score) {
   if (score >= 75) return { label: "Crítico", color: T.accent2, level: "critical" };
-  if (score >= 50) return { label: "Alto",    color: T.accent2, level: "high" };
-  if (score >= 25) return { label: "Medio",   color: T.accent3, level: "medium" };
-  return             { label: "Bajo",    color: T.accent,   level: "low" };
+  if (score >= 50) return { label: "Alto", color: T.accent2, level: "high" };
+  if (score >= 25) return { label: "Medio", color: T.accent3, level: "medium" };
+  return { label: "Bajo", color: T.accent, level: "low" };
 }
 
 function extractRiskFactors(answers) {
@@ -50,16 +50,16 @@ function extractRiskFactors(answers) {
 
 // ─── Componente ────────────────────────────────────────────────────────────
 export default function ExposureTest() {
-  const [current,  setCurrent]  = useState(0);   // índice pregunta actual
-  const [answers,  setAnswers]  = useState({});
-  const [score,    setScore]    = useState(null);
-  const [animDir,  setAnimDir]  = useState(1);   // 1 = avanza, -1 = retrocede
+  const [current, setCurrent] = useState(0);   // índice pregunta actual
+  const [answers, setAnswers] = useState({});
+  const [score, setScore] = useState(null);
+  const [animDir, setAnimDir] = useState(1);   // 1 = avanza, -1 = retrocede
 
-  const total      = questions.length;
-  const q          = questions[current];
-  const answered   = answers[q?.id] !== undefined;
-  const progreso   = Math.round((current / total) * 100);
-  const isLast     = current === total - 1;
+  const total = questions.length;
+  const q = questions[current];
+  const answered = answers[q?.id] !== undefined;
+  const progreso = Math.round((current / total) * 100);
+  const isLast = current === total - 1;
 
   const handleAnswer = (riskValue) => {
     const newAnswers = { ...answers, [q.id]: riskValue };
@@ -72,9 +72,9 @@ export default function ExposureTest() {
         const total = Object.values(newAnswers).reduce((sum, v) => sum + v, 0);
         const riskInfo = getRiskLevel(total);
         const riskFactors = extractRiskFactors(newAnswers);
-        
+
         setScore(total);
-        
+
         // Guardar en store.js
         saveResults({
           answers: newAnswers,
@@ -120,9 +120,9 @@ export default function ExposureTest() {
           {/* Descripción */}
           <p style={{ ...s.desc, textAlign: "center" }}>
             {score >= 75 ? "Tu exposición digital es muy alta. Tomá medidas urgentes."
-            : score >= 50 ? "Tenés varios factores de riesgo que deberías revisar."
-            : score >= 25 ? "Tu exposición es moderada. Hay margen para mejorar."
-            : "¡Excelente! Tu huella digital está bien controlada."}
+              : score >= 50 ? "Tenés varios factores de riesgo que deberías revisar."
+                : score >= 25 ? "Tu exposición es moderada. Hay margen para mejorar."
+                  : "¡Excelente! Tu huella digital está bien controlada."}
           </p>
 
           {/* Desglose rápido */}
@@ -146,8 +146,11 @@ export default function ExposureTest() {
           </div>
 
           {/* Botones */}
-          <div style={s.botonesRow}>
 
+
+          <div style={s.botonesRow}>
+            <button style={s.btnPrimario} onClick={() => window.location.href = "/resultados"}>
+              Ver resultados →
             </button>
             <button style={s.btnSecundario} onClick={() => {
               setAnswers({}); setScore(null); setCurrent(0);
@@ -162,7 +165,7 @@ export default function ExposureTest() {
 
   // ── PREGUNTA ────────────────────────────────────────────────────────────
   const isYes = answers[q.id] === q.risk;
-  const isNo  = answers[q.id] === 0;
+  const isNo = answers[q.id] === 0;
 
   return (
     <div style={s.wrap}>
@@ -203,9 +206,9 @@ export default function ExposureTest() {
           >
             <span style={{
               ...s.radio,
-              background:  isYes ? T.accent2 : "transparent",
+              background: isYes ? T.accent2 : "transparent",
               borderColor: isYes ? T.accent2 : T.muted,
-              boxShadow:   isYes ? `0 0 8px ${T.accent2}88` : "none",
+              boxShadow: isYes ? `0 0 8px ${T.accent2}88` : "none",
             }}>
               {isYes && <span style={{ color: "#fff", fontSize: "0.6rem", fontWeight: 900 }}>✓</span>}
             </span>
@@ -221,9 +224,9 @@ export default function ExposureTest() {
           >
             <span style={{
               ...s.radio,
-              background:  isNo ? T.accent : "transparent",
+              background: isNo ? T.accent : "transparent",
               borderColor: isNo ? T.accent : T.muted,
-              boxShadow:   isNo ? `0 0 8px ${T.accent}88` : "none",
+              boxShadow: isNo ? `0 0 8px ${T.accent}88` : "none",
             }}>
               {isNo && <span style={{ color: T.bg, fontSize: "0.6rem", fontWeight: 900 }}>✓</span>}
             </span>
@@ -255,9 +258,9 @@ export default function ExposureTest() {
               const t = Object.values(answers).reduce((sum, v) => sum + v, 0);
               const riskInfo = getRiskLevel(t);
               const riskFactors = extractRiskFactors(answers);
-              
+
               setScore(t);
-              
+
               // Guardar en store.js
               saveResults({
                 answers: answers,
@@ -280,9 +283,9 @@ export default function ExposureTest() {
             background: i < current
               ? (answers[questions[i].id] > 0 ? T.accent2 : T.accent)
               : i === current
-              ? T.text
-              : T.surface2,
-            width:  i === current ? "20px" : "6px",
+                ? T.text
+                : T.surface2,
+            width: i === current ? "20px" : "6px",
             opacity: i === current ? 1 : 0.6,
           }} />
         ))}
