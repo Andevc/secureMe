@@ -1,26 +1,6 @@
 ---
 import BaseLayout from '../layouts/Layout.astro';
-import RecommendationCard from '../components/recommendation/RecommendationCard.jsx';
-import { getRecommendations } from '../lib/recommendations.js';
-
-const mockData = {
-  score: 68,
-  level: 'Alto',
-  factors: [
-    'instagram_publico',
-    'ubicacion_publicada',
-    'telefono_visible',
-    'mismo_username',
-    'metadatos_fotos'
-  ]
-};
-
-const recommendations = getRecommendations(mockData.factors);
-
-// Contar por urgencia - FIX del error
-const urgentCount = recommendations.filter((r: any) => r.urgency === 'alta').length;
-const importantCount = recommendations.filter((r: any) => r.urgency === 'media').length;
-const recommendedCount = recommendations.filter((r: any) => r.urgency === 'baja').length;
+import RecommendationsView from '../components/recommendation/RecommendationsView.jsx';
 ---
 
 <BaseLayout title="Recomendaciones de Seguridad - DoxCheck">
@@ -35,81 +15,10 @@ const recommendedCount = recommendations.filter((r: any) => r.urgency === 'baja'
         <p class="subtitle">
           Basadas en tu análisis de exposición digital
         </p>
-
-        <!-- Score Card -->
-        <div class="score-card">
-          <p class="score-label">Tu nivel de riesgo</p>
-          <p class="score-value">
-            {mockData.score}<span class="score-max">/100</span>
-          </p>
-          <p class="score-level">Riesgo {mockData.level}</p>
-        </div>
       </div>
 
-      <!-- Alert motivacional -->
-      <div class="alert-box">
-        <div class="alert-icon">💪</div>
-        <div class="alert-content">
-          <p class="alert-title">¡Buenas noticias!</p>
-          <p class="alert-text">
-            Cada acción que tomes reduce tu exposición digital. No tienes que hacer todo de una vez: 
-            empieza por las recomendaciones urgentes y avanza a tu ritmo.
-          </p>
-        </div>
-      </div>
-
-      <!-- Tabla de recomendaciones -->
-      <div class="table-container">
-        {/* Header de la tabla */}
-        <div class="table-header">
-          <div class="table-header-grid">
-            <div class="header-cell" style="text-align: center;">Tipo</div>
-            <div class="header-cell" style="text-align: center;">Urgencia</div>
-            <div class="header-cell">Recomendación</div>
-            <div class="header-cell" style="text-align: right;">Acción</div>
-          </div>
-        </div>
-
-        {/* Body de la tabla */}
-        <div class="table-body">
-          {recommendations.map((rec, index) => (
-            <RecommendationCard 
-              recommendation={rec}
-              index={index}
-              client:load
-            />
-          ))}
-        </div>
-
-        {/* Footer con estadísticas - CORREGIDO */}
-        <div class="table-footer">
-          <p class="footer-text">
-            📊 Total: <strong>{recommendations.length} recomendaciones</strong> • 
-            Urgentes: <strong>{urgentCount}</strong> • 
-            Importantes: <strong>{importantCount}</strong> • 
-            Recomendadas: <strong>{recommendedCount}</strong>
-          </p>
-        </div>
-      </div>
-
-      <!-- CTA Final -->
-      <div class="cta-container">
-        <div class="cta-box">
-          <h2 class="cta-title">¿Qué sigue?</h2>
-          <p class="cta-text">
-            Implementa estas recomendaciones y vuelve a hacer el test en una semana 
-            para ver cómo ha mejorado tu score.
-          </p>
-          <div class="cta-buttons">
-            <a href="/test" class="btn btn-primary">
-              🔄 Volver al Test
-            </a>
-            <a href="/" class="btn btn-secondary">
-              🏠 Volver al Inicio
-            </a>
-          </div>
-        </div>
-      </div>
+      <!-- Componente cliente que maneja la lógica y datos de recomendaciones -->
+      <RecommendationsView client:load />
 
     </div>
   </div>
