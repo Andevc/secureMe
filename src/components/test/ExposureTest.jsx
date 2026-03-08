@@ -1,62 +1,76 @@
 import { useState } from "react";
-import { questions } from "./questions";
+import { questions } from "../data/questions";
+import { calculateRisk } from "../lib/scoreCalculator";
 
 export default function ExposureTest() {
 
   const [answers, setAnswers] = useState({});
-  const [score, setScore] = useState(null);
+  const [result, setResult] = useState(null);
 
-  const handleAnswer = (id, riskValue) => {
-    setAnswers({
-      ...answers,
-      [id]: riskValue
-    });
+  const handleAnswer = (questionId, value) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: value
+    }));
   };
 
-  const calculateScore = () => {
-    const total = Object.values(answers).reduce((sum, value) => sum + value, 0);
-    setScore(total);
+  const handleSubmit = () => {
+    const riskResult = calculateRisk(answers);
+    setResult(riskResult);
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="max-w-2xl mx-auto p-6">
 
       <h2 className="text-2xl font-bold mb-6">
-        Test de Exposición Digital
+        Test de exposición digital
       </h2>
 
       {questions.map((q) => (
-        <div key={q.id} className="mb-4 border p-4 rounded">
+        <div
+          key={q.id}
+          className="mb-6 p-4 border rounded-lg"
+        >
+          <p className="mb-3">{q.question}</p>
 
-          <p className="mb-2 font-medium">{q.question}</p>
+          <div className="flex gap-3">
 
-          <button
-            className="mr-2 bg-red-500 text-white px-3 py-1 rounded"
-            onClick={() => handleAnswer(q.id, q.risk)}
-          >
-            Sí
-          </button>
+            {q.options.map((opt) => (
+              <button
+                key={opt.label}
+                onClick={() => handleAnswer(q.id, opt.value)}
+                className="px-4 py-2 border rounded hover:bg-gray-100"
+              >
+                {opt.label}
+              </button>
+            ))}
 
-          <button
-            className="bg-green-500 text-white px-3 py-1 rounded"
-            onClick={() => handleAnswer(q.id, 0)}
-          >
-            No
-          </button>
-
+          </div>
         </div>
       ))}
 
       <button
-        onClick={calculateScore}
-        className="mt-6 bg-blue-600 text-white px-4 py-2 rounded"
+        onClick={handleSubmit}
+        className="mt-4 px-6 py-3 bg-blue-600 text-white rounded"
       >
-        Calcular Riesgo
+        Ver resultado
       </button>
 
-      {score !== null && (
-        <div className="mt-6 text-xl font-bold">
-          Tu riesgo de exposición es: {score} / 100
+      {result && (
+        <div className="mt-8 p-6 border rounded-lg">
+
+          <h3 className="text-xl font-semibold mb-2">
+            Resultado
+          </h3>
+
+          <p className="text-lg">
+            Score: <strong>{result.score}/100</strong>
+          </p>
+
+          <p className="text-lg">
+            Nivel de riesgo: <strong>{result.riskLevel}</strong>
+          </p>
+
         </div>
       )}
 
