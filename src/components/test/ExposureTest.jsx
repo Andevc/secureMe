@@ -1,5 +1,18 @@
 import { useState } from "react";
 import { questions } from "./questions";
+import { saveResults } from "../../lib/store.js";
+
+// ─── Mapeo de preguntas a factores de riesgo ────────────────────────────────
+const QUESTION_RISK_FACTORS = {
+  1: "instagram_publico",
+  2: "ubicacion_publicada",
+  3: "telefono_visible",
+  4: "mismo_username",
+  6: "fotos_sin_filtro",
+  8: "email_visible",
+  9: "ubicacion_publicada",
+  10: "metadatos_fotos",
+};
 
 // ─── Paleta ────────────────────────────────────────────────────────────────
 const T = {
@@ -17,10 +30,22 @@ const T = {
 };
 
 function getRiskLevel(score) {
-  if (score >= 75) return { label: "Crítico", color: T.accent2 };
-  if (score >= 50) return { label: "Alto",    color: T.accent2 };
-  if (score >= 25) return { label: "Medio",   color: T.accent3 };
-  return             { label: "Bajo",    color: T.accent  };
+  if (score >= 75) return { label: "Crítico", color: T.accent2, level: "critical" };
+  if (score >= 50) return { label: "Alto",    color: T.accent2, level: "high" };
+  if (score >= 25) return { label: "Medio",   color: T.accent3, level: "medium" };
+  return             { label: "Bajo",    color: T.accent,   level: "low" };
+}
+
+function extractRiskFactors(answers) {
+  const factors = new Set();
+  Object.entries(answers).forEach(([questionId, answer]) => {
+    if (answer > 0) { // Si respondió "sí"
+      const id = parseInt(questionId);
+      const riskFactor = QUESTION_RISK_FACTORS[id];
+      if (riskFactor) factors.add(riskFactor);
+    }
+  });
+  return Array.from(factors);
 }
 
 // ─── Componente ────────────────────────────────────────────────────────────
@@ -45,8 +70,18 @@ export default function ExposureTest() {
       if (isLast) {
         // Calcular score en la última pregunta
         const total = Object.values(newAnswers).reduce((sum, v) => sum + v, 0);
+        const riskInfo = getRiskLevel(total);
+        const riskFactors = extractRiskFactors(newAnswers);
+        
         setScore(total);
-        try { localStorage.setItem("doxcheck_resultado", JSON.stringify({ score: total })); } catch (_) {}
+        
+        // Guardar en store.js
+        saveResults({
+          answers: newAnswers,
+          score: total,
+          riskLevel: riskInfo.level,
+          riskFactors: riskFactors,
+        });
       } else {
         setAnimDir(1);
         setCurrent((c) => c + 1);
@@ -112,8 +147,7 @@ export default function ExposureTest() {
 
           {/* Botones */}
           <div style={s.botonesRow}>
-            <button style={s.btnPrimario} onClick={() => window.location.href = "/resultados"}>
-              Ver resultados →
+
             </button>
             <button style={s.btnSecundario} onClick={() => {
               setAnswers({}); setScore(null); setCurrent(0);
@@ -219,8 +253,18 @@ export default function ExposureTest() {
           {answered && isLast && (
             <button style={s.btnPrimario} onClick={() => {
               const t = Object.values(answers).reduce((sum, v) => sum + v, 0);
+              const riskInfo = getRiskLevel(t);
+              const riskFactors = extractRiskFactors(answers);
+              
               setScore(t);
-              try { localStorage.setItem("doxcheck_resultado", JSON.stringify({ score: t })); } catch (_) {}
+              
+              // Guardar en store.js
+              saveResults({
+                answers: answers,
+                score: t,
+                riskLevel: riskInfo.level,
+                riskFactors: riskFactors,
+              });
             }}>
               Ver resultado →
             </button>
