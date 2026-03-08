@@ -147,22 +147,7 @@ export default function ExposureTest() {
 
           {/* Botones */}
           <div style={s.botonesRow}>
-            <button style={s.btnPrimario} onClick={() => {
-              // Asegurar que los datos se guardan antes de navegar
-              const riskFactors = extractRiskFactors(answers);
-              const riskInfo = getRiskLevel(score);
-              saveResults({
-                answers: answers,
-                score: score,
-                riskLevel: riskInfo.level,
-                riskFactors: riskFactors,
-              });
-              // Pequeño delay para asegurar que se guardó
-              setTimeout(() => {
-                window.location.href = "/recomendaciones";
-              }, 100);
-            }}>
-              Ver recomendaciones →
+
             </button>
             <button style={s.btnSecundario} onClick={() => {
               setAnswers({}); setScore(null); setCurrent(0);

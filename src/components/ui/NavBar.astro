@@ -1,9 +1,10 @@
 ---
 // NavBar.astro - DoxCheck Navigation
 import logo from '../../assets/logo.png';
+import {fade} from 'astro:transitions';
 ---
 
-<nav class="dox-nav" id="navbar">
+<nav class="dox-nav" id="navbar" transition:animate="fade" >
   <div class="nav-inner">
     <!-- Logo -->
     <a href="/" class="nav-logo" aria-label="DoxCheck Home">
@@ -14,8 +15,8 @@ import logo from '../../assets/logo.png';
       </div>
 
       <div class="logo-text">
-        <span class="logo-name">Tata-Dox<em>Check</em></span>
-        <span class="logo-sub">Digital Risk Analyzer</span>
+        <span class="logo-name">Secure<em>Me</em></span>
+        <span class="logo-sub">Analisis Digital2</span>
       </div>
 
     </a>
@@ -53,6 +54,8 @@ import logo from '../../assets/logo.png';
     <a href="/test" class="mobile-cta">Analizar mi exposición →</a>
   </div>
 </nav>
+
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
