@@ -1,11 +1,13 @@
 ---
 import NavBar from "../components/ui/NavBar.astro";
 import Footer from "../components/ui/Footer.astro";
+import { ClientRouter } from 'astro:transitions';
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
+		<ClientRouter />
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -29,3 +31,11 @@ import Footer from "../components/ui/Footer.astro";
 		<Footer />
 	</body>
 </html>
+
+<style is:global>
+	*{
+		box-sizing: border-box;
+		margin: 0 auto;
+	}
+
+</style>
