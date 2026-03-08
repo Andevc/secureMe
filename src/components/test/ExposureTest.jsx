@@ -112,8 +112,8 @@ export default function ExposureTest() {
 
           {/* Botones */}
           <div style={s.botonesRow}>
-            <button style={s.btnPrimario} onClick={() => window.location.href = "/recomendaciones"}>
-              Ver recomendaciones →
+            <button style={s.btnPrimario} onClick={() => window.location.href = "/resultados"}>
+              Ver resultados →
             </button>
             <button style={s.btnSecundario} onClick={() => {
               setAnswers({}); setScore(null); setCurrent(0);

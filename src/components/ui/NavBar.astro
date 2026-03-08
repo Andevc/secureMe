@@ -1,9 +1,10 @@
 ---
 // NavBar.astro - DoxCheck Navigation
 import logo from '../../assets/logo.png';
+import { slide } from 'astro:transitions';
 ---
 
-<nav class="dox-nav" id="navbar">
+<nav class="dox-nav" id="navbar" transition:animate="slide" >
   <div class="nav-inner">
     <!-- Logo -->
     <a href="/" class="nav-logo" aria-label="DoxCheck Home">

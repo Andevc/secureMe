@@ -1,1 +1,387 @@
-q
+---
+import BaseLayout from '../layouts/Layout.astro';
+import RecommendationCard from '../components/recommendation/RecommendationCard.jsx';
+import { getRecommendations } from '../lib/recommendations.js';
+
+const mockData = {
+  score: 68,
+  level: 'Alto',
+  factors: [
+    'instagram_publico',
+    'ubicacion_publicada',
+    'telefono_visible',
+    'mismo_username',
+    'metadatos_fotos'
+  ]
+};
+
+const recommendations = getRecommendations(mockData.factors);
+
+// Contar por urgencia - FIX del error
+const urgentCount = recommendations.filter((r: any) => r.urgency === 'alta').length;
+const importantCount = recommendations.filter((r: any) => r.urgency === 'media').length;
+const recommendedCount = recommendations.filter((r: any) => r.urgency === 'baja').length;
+---
+
+<BaseLayout title="Recomendaciones de Seguridad - DoxCheck">
+  <div class="page-container">
+    <div class="content-wrapper">
+      
+      <!-- Header -->
+      <div class="header">
+        <h1 class="main-title">
+          🛡️ Tus Recomendaciones de Seguridad
+        </h1>
+        <p class="subtitle">
+          Basadas en tu análisis de exposición digital
+        </p>
+
+        <!-- Score Card -->
+        <div class="score-card">
+          <p class="score-label">Tu nivel de riesgo</p>
+          <p class="score-value">
+            {mockData.score}<span class="score-max">/100</span>
+          </p>
+          <p class="score-level">Riesgo {mockData.level}</p>
+        </div>
+      </div>
+
+      <!-- Alert motivacional -->
+      <div class="alert-box">
+        <div class="alert-icon">💪</div>
+        <div class="alert-content">
+          <p class="alert-title">¡Buenas noticias!</p>
+          <p class="alert-text">
+            Cada acción que tomes reduce tu exposición digital. No tienes que hacer todo de una vez: 
+            empieza por las recomendaciones urgentes y avanza a tu ritmo.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tabla de recomendaciones -->
+      <div class="table-container">
+        {/* Header de la tabla */}
+        <div class="table-header">
+          <div class="table-header-grid">
+            <div class="header-cell" style="text-align: center;">Tipo</div>
+            <div class="header-cell" style="text-align: center;">Urgencia</div>
+            <div class="header-cell">Recomendación</div>
+            <div class="header-cell" style="text-align: right;">Acción</div>
+          </div>
+        </div>
+
+        {/* Body de la tabla */}
+        <div class="table-body">
+          {recommendations.map((rec, index) => (
+            <RecommendationCard 
+              recommendation={rec}
+              index={index}
+              client:load
+            />
+          ))}
+        </div>
+
+        {/* Footer con estadísticas - CORREGIDO */}
+        <div class="table-footer">
+          <p class="footer-text">
+            📊 Total: <strong>{recommendations.length} recomendaciones</strong> • 
+            Urgentes: <strong>{urgentCount}</strong> • 
+            Importantes: <strong>{importantCount}</strong> • 
+            Recomendadas: <strong>{recommendedCount}</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- CTA Final -->
+      <div class="cta-container">
+        <div class="cta-box">
+          <h2 class="cta-title">¿Qué sigue?</h2>
+          <p class="cta-text">
+            Implementa estas recomendaciones y vuelve a hacer el test en una semana 
+            para ver cómo ha mejorado tu score.
+          </p>
+          <div class="cta-buttons">
+            <a href="/test" class="btn btn-primary">
+              🔄 Volver al Test
+            </a>
+            <a href="/" class="btn btn-secondary">
+              🏠 Volver al Inicio
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #080b10;
+    --surface: #0e1320;
+    --surface2: #141b2d;
+    --border: rgba(255,255,255,0.06);
+    --accent: #e8ff47;
+    --accent2: #ff4d6d;
+    --accent3: #47c5ff;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  .page-container {
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 48px 20px;
+    font-family: var(--font-display);
+  }
+
+  .content-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .main-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 30px rgba(232, 255, 71, 0.3);
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .score-card {
+    display: inline-block;
+    padding: 28px 48px;
+    border-radius: 16px;
+    background: var(--surface2);
+    border: 2px solid var(--accent2);
+    box-shadow: 
+      0 0 40px rgba(255, 77, 109, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .score-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .score-value {
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--accent2);
+    line-height: 1;
+    margin: 12px 0;
+    text-shadow: 0 0 20px rgba(255, 77, 109, 0.5);
+  }
+
+  .score-max {
+    font-size: 36px;
+    color: var(--muted);
+  }
+
+  .score-level {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-top: 8px;
+  }
+
+  /* Alert box */
+  .alert-box {
+    display: flex;
+    gap: 20px;
+    background: var(--surface2);
+    color: var(--text);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .alert-icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .alert-content {
+    flex: 1;
+  }
+
+  .alert-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  .alert-text {
+    color: var(--muted);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* Tabla */
+  .table-container {
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .table-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+
+  .table-header-grid {
+    display: grid;
+    grid-template-columns: 80px 120px 1fr 140px;
+    gap: 20px;
+    padding: 16px 0;
+  }
+
+  .header-cell {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+  }
+
+  .table-body {
+    /* Las filas se agregan aquí */
+  }
+
+  .table-footer {
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    text-align: center;
+  }
+
+  .footer-text {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+    font-family: var(--font-mono);
+  }
+
+  .footer-text strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* CTA */
+  .cta-container {
+    margin-top: 56px;
+    text-align: center;
+  }
+
+  .cta-box {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 40px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .cta-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .cta-text {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto 28px;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 14px 32px;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 15px;
+    transition: all 0.2s;
+    display: inline-block;
+    font-family: var(--font-display);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 4px 12px rgba(232, 255, 71, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(232, 255, 71, 0.5);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent3);
+    border: 2px solid var(--accent3);
+  }
+
+  .btn-secondary:hover {
+    background: var(--surface2);
+    box-shadow: 0 0 20px rgba(71, 197, 255, 0.3);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .table-header-grid {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .header-cell {
+      display: none;
+    }
+
+    .main-title {
+      font-size: 32px;
+    }
+
+    .score-value {
+      font-size: 48px;
+    }
+  }
+</style>
