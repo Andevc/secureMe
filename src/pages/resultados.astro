@@ -1,11 +1,10 @@
-
 ---
-import BaseLayout from '../layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro';
 import RecommendationsView from '../components/recommendation/RecommendationsView.jsx';
 ---
 
-<BaseLayout title="Recomendaciones de Seguridad - DoxCheck">
-  <div class="page-container">
+<Layout title="Recomendaciones de Seguridad - DoxCheck">
+  <main class="page-container">
     <div class="content-wrapper">
       
       <!-- Header -->
@@ -22,8 +21,8 @@ import RecommendationsView from '../components/recommendation/RecommendationsVie
       <RecommendationsView client:load />
 
     </div>
-  </div>
-</BaseLayout>
+  </main>
+</Layout>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
@@ -44,6 +43,7 @@ import RecommendationsView from '../components/recommendation/RecommendationsVie
 
   .page-container {
     min-height: 100vh;
+    
     background: var(--bg);
     padding: 48px 20px;
     font-family: var(--font-display);

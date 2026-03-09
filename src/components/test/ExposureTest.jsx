@@ -365,8 +365,10 @@ const s = {
     display: "flex",
     alignItems: "center",
     gap: "1rem",
+    width: "100%"
   },
   opcionSi: {
+    
     background: "rgba(255,77,109,0.06)",
     border: "1px solid rgba(255,77,109,0.35)",
   },
